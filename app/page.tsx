@@ -2,6 +2,7 @@
 
 import GithubIcon from "@/components/icons/github-icon";
 import XIcon from "@/components/icons/x-icon";
+import { MicrophoneIcon } from "@/components/icons/microphone-icon";
 import Logo from "@/components/logo";
 import Spinner from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export default function Home() {
   const [iterativeMode, setIterativeMode] = useState(false);
   const [refinePrompt, setRefinePrompt] = useState(false);
   const [userAPIKey, setUserAPIKey] = useState("");
+  const [isListening, setIsListening] = useState(false);
   const debouncedPrompt = useDebounce(prompt, 300);
   const [generations, setGenerations] = useState<
     { prompt: string; image: ImageResponse }[]
@@ -83,6 +85,25 @@ export default function Home() {
   let activeImage =
     activeIndex !== undefined ? generations[activeIndex].image : undefined;
 
+  const handleVoiceInput = () => {
+    setIsListening(true);
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = event.results[0][0].transcript;
+      setPrompt((prevPrompt) => prevPrompt + ' ' + transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      console.error('Speech recognition error', event.error);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
   return (
     <div className="flex h-full flex-col px-5">
       <header className="flex justify-center pt-20 md:justify-end md:pt-3">
@@ -130,6 +151,14 @@ export default function Home() {
               >
                 <Spinner className="size-4" />
               </div>
+              <Button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`absolute right-2 top-2 p-2 ${isListening ? 'bg-red-500' : 'bg-gray-500'} text-white rounded-full hover:bg-opacity-80 transition-colors`}
+                title={isListening ? "Listening..." : "Click to speak"}
+              >
+                <MicrophoneIcon className="w-5 h-5" />
+              </Button>
             </div>
 
             <div className="mt-3 text-sm md:text-right">
