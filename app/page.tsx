@@ -22,6 +22,7 @@ type ImageResponse = {
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [iterativeMode, setIterativeMode] = useState(false);
+  const [refinePrompt, setRefinePrompt] = useState(false);
   const [userAPIKey, setUserAPIKey] = useState("");
   const debouncedPrompt = useDebounce(prompt, 300);
   const [generations, setGenerations] = useState<
@@ -31,14 +32,33 @@ export default function Home() {
 
   const { data: image, isFetching } = useQuery({
     placeholderData: (previousData) => previousData,
-    queryKey: [debouncedPrompt],
+    queryKey: [debouncedPrompt, refinePrompt],
     queryFn: async () => {
+      let finalPrompt = prompt;
+      
+      if (refinePrompt) {
+        const refineResponse = await fetch("/api/refinePrompt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt }),
+        });
+
+        if (!refineResponse.ok) {
+          throw new Error(await refineResponse.text());
+        }
+
+        const refinedPromptData = await refineResponse.json();
+        finalPrompt = refinedPromptData.refinedPrompt;
+      }
+
       let res = await fetch("/api/generateImages", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt, userAPIKey, iterativeMode }),
+        body: JSON.stringify({ prompt: finalPrompt, userAPIKey, iterativeMode, refinePrompt }),
       });
 
       if (!res.ok) {
@@ -121,6 +141,18 @@ export default function Home() {
                 <Switch
                   checked={iterativeMode}
                   onCheckedChange={setIterativeMode}
+                />
+              </label>
+            </div>
+            <div className="mt-2 text-sm md:text-right">
+              <label
+                title="Refine the prompt before sending to Flux model"
+                className="inline-flex items-center gap-2"
+              >
+                Refine prompt
+                <Switch
+                  checked={refinePrompt}
+                  onCheckedChange={setRefinePrompt}
                 />
               </label>
             </div>
