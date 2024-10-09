@@ -3,6 +3,7 @@
 import GithubIcon from "@/components/icons/github-icon";
 import XIcon from "@/components/icons/x-icon";
 import { MicrophoneIcon } from "@/components/icons/microphone-icon";
+import { HeartIcon } from "@/components/icons/heart-icon";
 import Logo from "@/components/logo";
 import Spinner from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,19 @@ export default function Home() {
     { prompt: string; image: ImageResponse }[]
   >([]);
   let [activeIndex, setActiveIndex] = useState<number>();
+  const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
+
+  const toggleLike = (index: number) => {
+    setLikedImages((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
 
   const { data: image, isFetching } = useQuery({
     placeholderData: (previousData) => previousData,
@@ -216,21 +230,36 @@ export default function Home() {
 
             <div className="mt-4 flex gap-4 overflow-x-scroll pb-4">
               {generations.map((generatedImage, i) => (
-                <button
-                  key={i}
-                  className="w-32 shrink-0 opacity-50 hover:opacity-100"
-                  onClick={() => setActiveIndex(i)}
-                >
-                  <Image
-                    placeholder="blur"
-                    blurDataURL={imagePlaceholder.blurDataURL}
-                    width={1024}
-                    height={768}
-                    src={`data:image/png;base64,${generatedImage.image.b64_json}`}
-                    alt=""
-                    className="max-w-full rounded-lg object-cover shadow-sm shadow-black"
-                  />
-                </button>
+                <div key={i} className="relative w-32 shrink-0">
+                  <button
+                    className="w-full opacity-50 hover:opacity-100"
+                    onClick={() => setActiveIndex(i)}
+                  >
+                    <Image
+                      placeholder="blur"
+                      blurDataURL={imagePlaceholder.blurDataURL}
+                      width={1024}
+                      height={768}
+                      src={`data:image/png;base64,${generatedImage.image.b64_json}`}
+                      alt=""
+                      className="max-w-full rounded-lg object-cover shadow-sm shadow-black"
+                    />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(i);
+                    }}
+                    className="absolute bottom-2 right-2 p-1 bg-white bg-opacity-50 rounded-full"
+                  >
+                    <HeartIcon
+                      className={`w-4 h-4 ${
+                        likedImages.has(i) ? "text-red-500" : "text-gray-500"
+                      }`}
+                      fill={likedImages.has(i) ? "currentColor" : "none"}
+                    />
+                  </button>
+                </div>
               ))}
             </div>
           </div>
