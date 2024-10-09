@@ -210,7 +210,7 @@ export default function Home() {
               Generate images in real-time
             </p>
             <p className="mt-4 text-balance text-sm text-gray-300 md:text-base lg:text-lg">
-              Enter a prompt and generate images in milliseconds as you type.
+              Enter a prompt or use your voice to generate images in milliseconds.  
               Powered by Flux on Together AI.
             </p>
           </div>
