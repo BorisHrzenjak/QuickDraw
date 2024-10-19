@@ -19,11 +19,10 @@ if (process.env.UPSTASH_REDIS_REST_URL) {
 
 export async function POST(req: Request) {
   let json = await req.json();
-  let { prompt, userAPIKey, iterativeMode } = z
+  let { prompt, iterativeMode } = z
     .object({
       prompt: z.string(),
       iterativeMode: z.boolean(),
-      userAPIKey: z.string().optional(),
     })
     .parse(json);
 
@@ -33,23 +32,18 @@ export async function POST(req: Request) {
     options.baseURL = "https://together.helicone.ai/v1";
     options.defaultHeaders = {
       "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Property-BYOK": userAPIKey ? "true" : "false",
     };
   }
 
   const client = new Together(options);
 
-  if (userAPIKey) {
-    client.apiKey = userAPIKey;
-  }
-
-  if (ratelimit && !userAPIKey) {
+  if (ratelimit) {
     const identifier = getIPAddress();
 
     const { success } = await ratelimit.limit(identifier);
     if (!success) {
       return Response.json(
-        "No requests left. Please add your own API key or try again in 24h.",
+        "No requests left. Please try again in 24h.",
         {
           status: 429,
         },

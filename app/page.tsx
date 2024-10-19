@@ -25,7 +25,6 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [iterativeMode, setIterativeMode] = useState(false);
   const [refinePrompt, setRefinePrompt] = useState(false);
-  const [userAPIKey, setUserAPIKey] = useState("");
   const [isListening, setIsListening] = useState(false);
   const debouncedPrompt = useDebounce(prompt, 300);
   const [generations, setGenerations] = useState<
@@ -74,7 +73,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: finalPrompt, userAPIKey, iterativeMode, refinePrompt }),
+        body: JSON.stringify({ prompt: finalPrompt, iterativeMode, refinePrompt }),
       });
 
       if (!res.ok) {
@@ -129,25 +128,6 @@ export default function Home() {
           <a href="https://www.dub.sh/together-ai" target="_blank">
             <Logo />
           </a>
-        </div>
-        <div>
-          <label className="text-xs text-gray-200">
-            [Optional] Add your{" "}
-            <a
-              href="https://api.together.xyz/settings/api-keys"
-              target="_blank"
-              className="underline underline-offset-4 transition hover:text-blue-500"
-            >
-              Together API Key
-            </a>{" "}
-          </label>
-          <Input
-            placeholder="API Key"
-            type="password"
-            value={userAPIKey}
-            className="mt-1 bg-gray-400 text-gray-200 placeholder:text-gray-300"
-            onChange={(e) => setUserAPIKey(e.target.value)}
-          />
         </div>
       </header>
 
