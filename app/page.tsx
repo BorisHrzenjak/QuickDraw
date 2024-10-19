@@ -132,7 +132,7 @@ export default function Home() {
       </header>
 
       <div className="flex justify-center">
-        <form className="mt-10 w-full max-w-lg">
+        <form className="mt-[100px] w-full max-w-lg">
           <fieldset>
             <div className="relative">
               <Textarea
