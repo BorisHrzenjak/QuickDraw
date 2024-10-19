@@ -118,6 +118,10 @@ export default function Home() {
     recognition.start();
   };
 
+  const handleClearPrompt = () => {
+    setPrompt("");
+  };
+
   return (
     <div className="flex h-full flex-col px-5">
       <header className="flex justify-center pt-20 md:justify-end md:pt-3">
@@ -172,6 +176,18 @@ export default function Home() {
                 title={isListening ? "Listening..." : "Click to speak"}
               >
                 <MicrophoneIcon className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="mt-2 flex justify-end">
+              <Button
+                type="button"
+                onClick={handleClearPrompt}
+                variant="outline"
+                size="sm"
+                className="text-gray-300 border-gray-300 hover:bg-gray-700"
+              >
+                Clear
               </Button>
             </div>
 
