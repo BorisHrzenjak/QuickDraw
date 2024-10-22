@@ -4,6 +4,13 @@ import type { Metadata } from "next";
 import PlausibleProvider from "next-plausible";
 import localFont from "next/font/local";
 import "./globals.css";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -50,17 +57,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <head>
-        <meta name="color-scheme" content="dark" />
-        <PlausibleProvider domain="blinkshot.io" />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} dark h-full min-h-full bg-[length:6px] font-mono text-gray-100 antialiased`}
-        style={{ backgroundImage: `url(${bgPattern.src}` }}
-      >
-        <Providers>{children}</Providers>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="h-full">
+        <head>
+          <meta name="color-scheme" content="dark" />
+          <PlausibleProvider domain="blinkshot.io" />
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} dark h-full min-h-full bg-[length:6px] font-mono text-gray-100 antialiased`}
+          style={{ backgroundImage: `url(${bgPattern.src}` }}
+        >
+          <header>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </header>
+          <Providers>{children}</Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -29,3 +29,28 @@
 - [ ] Build an image gallery of cool generations w/ their prompts
 - [ ] Add replay functionality so people can replay consistent generations
 - [ ] Add a setting to select between steps (2-5)
+
+## Authentication
+
+This project uses [Clerk](https://clerk.dev/) for authentication. To set up authentication:
+
+1. Sign up for a Clerk account and create a new application.
+2. Copy your Clerk Publishable Key and Secret Key.
+3. Create a `.env.local` file in the root of your project and add the following:
+
+   ```
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_publishable_key
+   CLERK_SECRET_KEY=your_secret_key
+   ```
+
+   Replace `your_publishable_key` and `your_secret_key` with your actual Clerk keys.
+
+4. Install the Clerk package:
+
+   ```
+   npm install @clerk/nextjs
+   ```
+
+5. The `ClerkProvider` is already set up in `app/layout.tsx`, wrapping the entire application.
+
+For more information on using Clerk with Next.js, refer to the [Clerk Next.js documentation](https://clerk.dev/docs/nextjs/get-started-with-nextjs).
