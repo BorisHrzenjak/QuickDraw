@@ -11,7 +11,6 @@ import {
   SignedOut,
   UserButton
 } from '@clerk/nextjs'
-import { Button } from "@/components/ui/button";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -68,25 +67,21 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} dark h-full min-h-full bg-[length:6px] font-mono text-gray-100 antialiased`}
           style={{ backgroundImage: `url(${bgPattern.src}` }}
         >
-          <header className="fixed w-full">
-            <div className="flex items-center justify-end p-4">
+          <header>
+            <div className="flex justify-end p-4">
               <SignedOut>
-                <SignInButton mode="modal">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="border-gray-300 text-gray-100 hover:bg-gray-700 hover:text-gray-100"
-                  >
-                    Sign In
-                  </Button>
+                <SignInButton>
+                  <button className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700">
+                    Sign in
+                  </button>
                 </SignInButton>
               </SignedOut>
               <SignedIn>
                 <UserButton 
                   appearance={{
                     elements: {
-                      avatarBox: "w-8 h-8 rounded-full ring-2 ring-gray-300 hover:ring-gray-100 transition-all",
-                      userButtonPopoverCard: "bg-gray-800 border border-gray-700",
+                      userButtonAvatarBox: "w-8 h-8",
+                      userButtonTrigger: "focus:shadow-none"
                     }
                   }}
                 />

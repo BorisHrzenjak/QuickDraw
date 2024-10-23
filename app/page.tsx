@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { SignInButton } from "@clerk/nextjs";
 
 type ImageResponse = {
   b64_json: string;
