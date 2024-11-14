@@ -16,6 +16,11 @@ import { useDebounce } from "@uidotdev/usehooks";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SignInButton } from "@clerk/nextjs";
+import { db } from "@/lib/utils";
+import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useUser } from "@clerk/nextjs";
 
 type ImageResponse = {
   b64_json: string;
@@ -33,14 +38,32 @@ export default function Home() {
   >([]);
   let [activeIndex, setActiveIndex] = useState<number>();
   const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
+  const user = useUser();
 
-  const toggleLike = (index: number) => {
+  const toggleLike = async (index: number) => {
+    if (!user.user) {
+      // Handle unauthenticated user case
+      toast.error("Please sign in to save images");
+      return;
+    }
+
     setLikedImages((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
         newSet.delete(index);
+        // Remove from Firebase
+        const imageDoc = doc(db, "likedImages", generations[index].image.b64_json);
+        deleteDoc(imageDoc).catch(console.error);
       } else {
         newSet.add(index);
+        // Add to Firebase
+        const imageDoc = {
+          userId: user.user.id, // Fixed: accessing ID through user.user.id
+          prompt: generations[index].prompt,
+          imageData: generations[index].image.b64_json,
+          timestamp: new Date().toISOString(),
+        };
+        addDoc(collection(db, "likedImages"), imageDoc).catch(console.error);
       }
       return newSet;
     });
@@ -124,6 +147,7 @@ export default function Home() {
 
   return (
     <div className="flex h-full flex-col px-5">
+      <ToastContainer />
       <header className="flex justify-center pt-20 md:justify-end md:pt-3">
         <div className="absolute left-1/2 top-6 -translate-x-1/2">
           <a href="https://www.dub.sh/together-ai" target="_blank">

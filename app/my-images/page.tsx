@@ -6,24 +6,43 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SignedIn, useUser } from "@clerk/nextjs";
 import imagePlaceholder from "@/public/image-placeholder.png";
+import { db } from "@/lib/utils"; // Ensure db is imported
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 type SavedImage = {
-  id: number;
+  id: string; // Change from number to string
   prompt: string;
   imageData: string;
   timestamp: string;
 };
 
 export default function MyImages() {
-  const { user } = useUser();
+  const { isLoaded, user } = useUser();
   const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // This is a placeholder - you'll need to implement the actual data fetching
   useEffect(() => {
-    // TODO: Fetch saved images from your database
-    setLoading(false);
-  }, []);
+    const fetchLikedImages = async () => {
+      if (!isLoaded || !user) return;
+      
+      const q = query(
+        collection(db, "likedImages"), 
+        where("userId", "==", user.id)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const images = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        prompt: doc.data().prompt,
+        imageData: doc.data().imageData,
+        timestamp: doc.data().timestamp,
+      }));
+      setSavedImages(images);
+      setLoading(false);
+    };
+
+    fetchLikedImages();
+  }, [isLoaded, user]); // Updated dependency array to use isLoaded and user
 
   return (
     <SignedIn>
@@ -58,7 +77,7 @@ export default function MyImages() {
               {savedImages.map((image) => (
                 <div key={image.id} className="relative group">
                   <Image
-                    src={image.imageData}
+                    src={`data:image/png;base64,${image.imageData}`}
                     alt={image.prompt}
                     width={400}
                     height={400}
