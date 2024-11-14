@@ -190,7 +190,7 @@ export default function Home() {
                 onClick={handleClearPrompt}
                 variant="outline"
                 size="sm"
-                className="text-gray-300 border-gray-300 hover:bg-gray-700"
+                className="text-gray-300 border-gray-300 hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600"
               >
                 Clear
               </Button>

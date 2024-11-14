@@ -72,7 +72,7 @@ export default function RootLayout({
               <SignedIn>
                 <a 
                   href="/my-images" 
-                  className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 px-4 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-gray-300 focus-visible:outline-none"
+                  className="inline-flex h-9 items-center justify-center rounded-md border border-gray-300 px-4 text-sm font-medium text-gray-300 transition-all hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 focus-visible:outline-none"
                 >
                   My Images
                 </a>
