@@ -21,11 +21,11 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
-let title = "BlinkShot – Real-Time AI Image Generator";
-let description = "Generate images with AI in a milliseconds";
-let url = "https://www.blinkshot.io/";
-let ogimage = "https://www.blinkshot.io/og-image.png";
-let sitename = "blinkshot.io";
+let title = "QuickDraw – Real-Time AI Image Generator";
+let description = "Generate images with AI in milliseconds";
+let url = "https://www.quickdraw.io/";
+let ogimage = "https://www.quickdraw.io/og-image.png";
+let sitename = "quickdraw.io";
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
@@ -61,7 +61,7 @@ export default function RootLayout({
       <html lang="en" className="h-full">
         <head>
           <meta name="color-scheme" content="dark" />
-          <PlausibleProvider domain="blinkshot.io" />
+          <PlausibleProvider domain="quickdraw.io" />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} dark h-full min-h-full bg-[length:6px] font-mono text-gray-100 antialiased`}
