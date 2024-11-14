@@ -7,7 +7,9 @@ import { useEffect, useState } from "react";
 import { SignedIn, useUser } from "@clerk/nextjs";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { db } from "@/lib/utils"; // Ensure db is imported
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 type SavedImage = {
   id: string; // Change from number to string
@@ -21,28 +23,39 @@ export default function MyImages() {
   const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchLikedImages = async () => {
-      if (!isLoaded || !user) return;
-      
-      const q = query(
-        collection(db, "likedImages"), 
-        where("userId", "==", user.id)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const images = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        prompt: doc.data().prompt,
-        imageData: doc.data().imageData,
-        timestamp: doc.data().timestamp,
-      }));
-      setSavedImages(images);
-      setLoading(false);
-    };
+  const fetchLikedImages = async () => {
+    if (!isLoaded || !user) return;
+    
+    const q = query(
+      collection(db, "likedImages"), 
+      where("userId", "==", user.id)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const images = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      prompt: doc.data().prompt,
+      imageData: doc.data().imageData,
+      timestamp: doc.data().timestamp,
+    }));
+    setSavedImages(images);
+    setLoading(false);
+  };
 
+  const handleDeleteImage = async (imageId: string) => {
+    try {
+      await deleteDoc(doc(db, "likedImages", imageId));
+      setSavedImages((prevImages) => prevImages.filter((img) => img.id !== imageId));
+      toast.success("Image deleted successfully");
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      toast.error("Failed to delete image");
+    }
+  };
+
+  useEffect(() => {
     fetchLikedImages();
-  }, [isLoaded, user]); // Updated dependency array to use isLoaded and user
+  }, [isLoaded, user]);
 
   return (
     <SignedIn>
@@ -94,8 +107,9 @@ export default function MyImages() {
                     </p>
                   </div>
                   <button
-                    className="absolute top-2 right-2 p-2 bg-white bg-opacity-50 rounded-full"
+                    className="absolute top-2 right-2 p-2 bg-white bg-opacity-50 rounded-full hover:bg-opacity-75 transition-all"
                     title="Remove from saved"
+                    onClick={() => handleDeleteImage(image.id)}
                   >
                     <HeartIcon className="w-4 h-4 text-red-500" fill="currentColor" />
                   </button>
@@ -103,6 +117,18 @@ export default function MyImages() {
               ))}
             </div>
           )}
+          <ToastContainer 
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </main>
 
         <footer className="mt-auto py-8 text-center text-gray-300">
