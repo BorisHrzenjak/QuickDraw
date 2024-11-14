@@ -19,10 +19,12 @@ if (process.env.UPSTASH_REDIS_REST_URL) {
 
 export async function POST(req: Request) {
   let json = await req.json();
-  let { prompt, iterativeMode } = z
+  let { prompt, iterativeMode, aspectRatio, stylePreset } = z
     .object({
       prompt: z.string(),
       iterativeMode: z.boolean(),
+      aspectRatio: z.enum(["square", "portrait", "landscape"]).optional(),
+      stylePreset: z.enum(["anime", "photorealistic", "oil-painting"]).optional(),
     })
     .parse(json);
 
@@ -54,10 +56,12 @@ export async function POST(req: Request) {
   let response;
   try {
     response = await client.images.create({
-      prompt,
+      prompt: stylePreset
+        ? `${prompt}, ${stylePreset} style`
+        : prompt,
       model: "black-forest-labs/FLUX.1-schnell",
-      width: 1024,
-      height: 768,
+      width: aspectRatio === "portrait" ? 768 : 1024,
+      height: aspectRatio === "landscape" ? 768 : 1024,
       seed: iterativeMode ? 123 : undefined,
       steps: 3,
       // @ts-expect-error - this is not typed in the API

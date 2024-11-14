@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
@@ -32,6 +33,8 @@ export default function Home() {
   const [iterativeMode, setIterativeMode] = useState(false);
   const [refinePrompt, setRefinePrompt] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState<"square" | "portrait" | "landscape">("square");
+  const [stylePreset, setStylePreset] = useState<"anime" | "photorealistic" | "oil-painting">("photorealistic");
   const debouncedPrompt = useDebounce(prompt, 300);
   const [generations, setGenerations] = useState<
     { prompt: string; image: ImageResponse }[]
@@ -97,7 +100,13 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: finalPrompt, iterativeMode, refinePrompt }),
+        body: JSON.stringify({ 
+          prompt: finalPrompt, 
+          iterativeMode, 
+          refinePrompt,
+          aspectRatio,
+          stylePreset
+        }),
       });
 
       if (!res.ok) {
@@ -196,29 +205,64 @@ export default function Home() {
               </Button>
             </div>
 
-            <div className="mt-3 text-sm md:text-right">
-              <label
-                title="Use earlier images as references"
-                className="inline-flex items-center gap-2"
-              >
-                Consistency mode
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-gray-300">
+                  Aspect Ratio
+                </label>
+                <Select value={aspectRatio} onValueChange={(value: any) => setAspectRatio(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select aspect ratio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="square">Square (1:1)</SelectItem>
+                    <SelectItem value="portrait">Portrait (3:4)</SelectItem>
+                    <SelectItem value="landscape">Landscape (4:3)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-gray-300">
+                  Style Preset
+                </label>
+                <Select value={stylePreset} onValueChange={(value: any) => setStylePreset(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="photorealistic">Photorealistic</SelectItem>
+                    <SelectItem value="anime">Anime</SelectItem>
+                    <SelectItem value="oil-painting">Oil Painting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label
+                  className="text-sm text-gray-300"
+                  title="Use earlier images as references"
+                >
+                  Iterative Mode
+                </label>
                 <Switch
                   checked={iterativeMode}
                   onCheckedChange={setIterativeMode}
                 />
-              </label>
-            </div>
-            <div className="mt-2 text-sm md:text-right">
-              <label
-                title="Refine the prompt before sending to Flux model"
-                className="inline-flex items-center gap-2"
-              >
-                Refine prompt
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label
+                  className="text-sm text-gray-300"
+                  title="Refine prompt before generating"
+                >
+                  Refine Prompt
+                </label>
                 <Switch
                   checked={refinePrompt}
                   onCheckedChange={setRefinePrompt}
                 />
-              </label>
+              </div>
             </div>
           </fieldset>
         </form>
