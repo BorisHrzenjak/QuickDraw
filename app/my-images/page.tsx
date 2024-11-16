@@ -10,6 +10,7 @@ import { db } from "@/lib/utils"; // Ensure db is imported
 import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ShareButtons from "@/components/share-buttons";
 
 type SavedImage = {
   id: string; // Change from number to string
@@ -99,20 +100,16 @@ export default function MyImages() {
                     className="rounded-lg shadow-sm shadow-black"
                   />
                   <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-sm text-gray-200 truncate">
-                      {image.prompt}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(image.timestamp).toLocaleDateString()}
-                    </p>
+                    <div className="flex justify-between items-center">
+                      <ShareButtons imageData={image.imageData} prompt={image.prompt} />
+                      <button
+                        onClick={() => handleDeleteImage(image.id)}
+                        className="text-red-500 hover:text-red-400"
+                      >
+                        <HeartIcon className="w-5 h-5 fill-current" />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    className="absolute top-2 right-2 p-2 bg-white bg-opacity-50 rounded-full hover:bg-opacity-75 transition-all"
-                    title="Remove from saved"
-                    onClick={() => handleDeleteImage(image.id)}
-                  >
-                    <HeartIcon className="w-4 h-4 text-red-500" fill="currentColor" />
-                  </button>
                 </div>
               ))}
             </div>
