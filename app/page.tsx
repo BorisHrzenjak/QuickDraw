@@ -22,6 +22,7 @@ import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "@clerk/nextjs";
+import CommunityShowcase from "@/components/community-showcase";
 
 type ImageResponse = {
   b64_json: string;
@@ -165,168 +166,210 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex justify-center">
-        <form className="mt-[100px] w-full max-w-lg">
-          <fieldset>
-            <div className="relative">
-              <Textarea
-                rows={4}
-                spellCheck={false}
-                placeholder="Describe your image..."
-                required
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full resize-none border-gray-300 border-opacity-50 bg-gray-400 px-4 text-base placeholder-gray-300"
+      <div className="flex justify-between gap-6">
+        <CommunityShowcase />
+        
+        <div className="flex-1 flex flex-col items-center max-w-5xl">
+          <form className="mt-[100px] w-full max-w-2xl">
+            <fieldset>
+              <div className="relative">
+                <Textarea
+                  rows={4}
+                  spellCheck={false}
+                  placeholder="Describe your image..."
+                  required
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="w-full resize-none border-gray-300 border-opacity-50 bg-gray-400 px-4 text-base placeholder-gray-300"
+                />
+                <div
+                  className={`${isFetching || isDebouncing ? "flex" : "hidden"} absolute bottom-3 right-3 items-center justify-center`}
+                >
+                  <Spinner className="size-4" />
+                </div>
+                <Button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  className={`absolute right-2 top-2 p-2 ${isListening ? 'bg-red-500' : 'bg-gray-500'} text-white rounded-full hover:bg-opacity-80 transition-colors`}
+                  title={isListening ? "Listening..." : "Click to speak"}
+                >
+                  <MicrophoneIcon className="w-5 h-5" />
+                </Button>
+              </div>
+
+              <div className="mt-2 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={handleClearPrompt}
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-300 border-gray-300 hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600"
+                >
+                  Clear
+                </Button>
+              </div>
+            </fieldset>
+          </form>
+
+          <div className="w-full max-w-3xl mt-8 flex justify-center">
+            {!activeImage || !prompt ? (
+              <div className="flex items-center justify-center w-full aspect-square bg-gray-900 bg-opacity-50 rounded-lg">
+                <p className="text-gray-400 text-sm">Your generated image will appear here</p>
+              </div>
+            ) : (
+              <div className="relative group">
+                <Image
+                  src={`data:image/png;base64,${activeImage.b64_json}`}
+                  alt={prompt}
+                  width={768}
+                  height={768}
+                  className="rounded-lg shadow-lg"
+                  placeholder="blur"
+                  blurDataURL={imagePlaceholder.blurDataURL}
+                />
+                <button
+                  onClick={() => toggleLike(activeIndex)}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <HeartIcon
+                    className={`w-5 h-5 ${
+                      likedImages.has(activeIndex)
+                        ? "text-pink-500 fill-current"
+                        : "text-white"
+                    }`}
+                  />
+                </button>
+                {generations.length > 1 && (
+                  <div className="absolute left-2 right-2 bottom-2 bg-black bg-opacity-50 rounded-md p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-2 overflow-x-auto custom-scrollbar-horizontal">
+                      {generations.map((generation, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveIndex(i)}
+                          className={`relative shrink-0 rounded-md overflow-hidden ${
+                            activeIndex === i
+                              ? "ring-2 ring-purple-500"
+                              : "opacity-50 hover:opacity-100"
+                          }`}
+                        >
+                          <Image
+                            src={`data:image/png;base64,${generation.image.b64_json}`}
+                            alt={generation.prompt}
+                            width={48}
+                            height={48}
+                            className="size-12 object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="w-64 mt-[100px] space-y-6 bg-gray-900 bg-opacity-50 p-6 rounded-lg h-fit">
+          <div className="space-y-3">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-300">
+                Aspect Ratio
+              </label>
+              <Select value={aspectRatio} onValueChange={(value: any) => setAspectRatio(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select aspect ratio" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="square">Square (1:1)</SelectItem>
+                  <SelectItem value="portrait">Portrait (3:4)</SelectItem>
+                  <SelectItem value="landscape">Landscape (4:3)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-gray-300">
+                Style Preset
+              </label>
+              <Select value={stylePreset} onValueChange={(value: any) => setStylePreset(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="photorealistic">Photorealistic</SelectItem>
+                  <SelectItem value="anime">Anime</SelectItem>
+                  <SelectItem value="oil-painting">Oil Painting</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label
+                className="text-sm text-gray-300"
+                title="Use earlier images as references"
+              >
+                Iterative Mode
+              </label>
+              <Switch
+                checked={iterativeMode}
+                onCheckedChange={setIterativeMode}
               />
-              <div
-                className={`${isFetching || isDebouncing ? "flex" : "hidden"} absolute bottom-3 right-3 items-center justify-center`}
-              >
-                <Spinner className="size-4" />
-              </div>
-              <Button
-                type="button"
-                onClick={handleVoiceInput}
-                className={`absolute right-2 top-2 p-2 ${isListening ? 'bg-red-500' : 'bg-gray-500'} text-white rounded-full hover:bg-opacity-80 transition-colors`}
-                title={isListening ? "Listening..." : "Click to speak"}
-              >
-                <MicrophoneIcon className="w-5 h-5" />
-              </Button>
             </div>
 
-            <div className="mt-2 flex justify-end">
-              <Button
-                type="button"
-                onClick={handleClearPrompt}
-                variant="outline"
-                size="sm"
-                className="text-gray-300 border-gray-300 hover:border-transparent hover:text-white hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600"
+            <div className="flex items-center justify-between">
+              <label
+                className="text-sm text-gray-300"
+                title="Refine prompt before generating"
               >
-                Clear
-              </Button>
+                Refine Prompt
+              </label>
+              <Switch
+                checked={refinePrompt}
+                onCheckedChange={setRefinePrompt}
+              />
             </div>
-
-            <div className="mt-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-300">
-                  Aspect Ratio
-                </label>
-                <Select value={aspectRatio} onValueChange={(value: any) => setAspectRatio(value)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select aspect ratio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="square">Square (1:1)</SelectItem>
-                    <SelectItem value="portrait">Portrait (3:4)</SelectItem>
-                    <SelectItem value="landscape">Landscape (4:3)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-gray-300">
-                  Style Preset
-                </label>
-                <Select value={stylePreset} onValueChange={(value: any) => setStylePreset(value)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="photorealistic">Photorealistic</SelectItem>
-                    <SelectItem value="anime">Anime</SelectItem>
-                    <SelectItem value="oil-painting">Oil Painting</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label
-                  className="text-sm text-gray-300"
-                  title="Use earlier images as references"
-                >
-                  Iterative Mode
-                </label>
-                <Switch
-                  checked={iterativeMode}
-                  onCheckedChange={setIterativeMode}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label
-                  className="text-sm text-gray-300"
-                  title="Refine prompt before generating"
-                >
-                  Refine Prompt
-                </label>
-                <Switch
-                  checked={refinePrompt}
-                  onCheckedChange={setRefinePrompt}
-                />
-              </div>
-            </div>
-          </fieldset>
-        </form>
+          </div>
+        </div>
       </div>
 
       <div className="flex w-full grow flex-col items-center justify-center pb-8 pt-4 text-center">
-        {!activeImage || !prompt ? (
-          <div className="max-w-xl md:max-w-4xl lg:max-w-3xl">
-            <p className="text-xl font-semibold text-gray-200 md:text-3xl lg:text-4xl">
-              Generate images in real-time
-            </p>
-            <p className="mt-4 text-balance text-sm text-gray-300 md:text-base lg:text-lg">
-              Enter a prompt or use your voice to generate images in milliseconds.  
-              Powered by Flux on Together AI.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-4 flex w-full max-w-4xl flex-col justify-center">
-            <div>
-              <Image
-                placeholder="blur"
-                blurDataURL={imagePlaceholder.blurDataURL}
-                width={1024}
-                height={768}
-                src={`data:image/png;base64,${activeImage.b64_json}`}
-                alt=""
-                className={`${isFetching ? "animate-pulse" : ""} max-w-full rounded-lg object-cover shadow-sm shadow-black`}
-              />
-            </div>
-
-            <div className="mt-4 flex gap-4 overflow-x-scroll pb-4">
-              {generations.map((generatedImage, i) => (
-                <div key={i} className="relative w-32 shrink-0">
-                  <button
-                    className="w-full opacity-50 hover:opacity-100"
-                    onClick={() => setActiveIndex(i)}
-                  >
-                    <Image
-                      placeholder="blur"
-                      blurDataURL={imagePlaceholder.blurDataURL}
-                      width={1024}
-                      height={768}
-                      src={`data:image/png;base64,${generatedImage.image.b64_json}`}
-                      alt=""
-                      className="max-w-full rounded-lg object-cover shadow-sm shadow-black"
-                    />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleLike(i);
-                    }}
-                    className="absolute bottom-2 right-2 p-1 bg-white bg-opacity-50 rounded-full"
-                  >
-                    <HeartIcon
-                      className={`w-4 h-4 ${
-                        likedImages.has(i) ? "text-red-500" : "text-gray-500"
-                      }`}
-                      fill={likedImages.has(i) ? "currentColor" : "none"}
-                    />
-                  </button>
-                </div>
-              ))}
-            </div>
+        {generations.length > 0 && (
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            {generations.map((generation, i) => (
+              <div key={i} className="relative">
+                <button
+                  onClick={() => setActiveIndex(i)}
+                  className={`relative rounded-lg overflow-hidden transition-all ${
+                    activeIndex === i
+                      ? "ring-2 ring-purple-500 ring-offset-2 ring-offset-black"
+                      : "opacity-50 hover:opacity-100"
+                  }`}
+                >
+                  <Image
+                    src={`data:image/png;base64,${generation.image.b64_json}`}
+                    alt={generation.prompt}
+                    width={96}
+                    height={96}
+                    className="size-24 object-cover"
+                  />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleLike(i);
+                  }}
+                  className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black bg-opacity-50 hover:bg-opacity-75 transition-all"
+                >
+                  <HeartIcon
+                    className={`w-4 h-4 ${
+                      likedImages.has(i)
+                        ? "text-pink-500 fill-current"
+                        : "text-white"
+                    }`}
+                  />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
