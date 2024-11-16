@@ -33,7 +33,7 @@ export default function CommunityShowcase() {
           id: doc.id,
           prompt: doc.data().prompt,
           imageData: doc.data().imageData,
-          likes: 1, // We'll implement actual like counting in the future
+          likes: 1, 
           timestamp: doc.data().timestamp,
         }));
         
