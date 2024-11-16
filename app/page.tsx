@@ -18,7 +18,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SignInButton } from "@clerk/nextjs";
 import { db } from "@/lib/utils";
-import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "@clerk/nextjs";
@@ -51,26 +51,36 @@ export default function Home() {
       return;
     }
 
-    setLikedImages((prev) => {
-      const newSet = new Set(prev);
+    try {
+      const newSet = new Set(likedImages);
       if (newSet.has(index)) {
         newSet.delete(index);
-        // Remove from Firebase
-        const imageDoc = doc(db, "likedImages", generations[index].image.b64_json);
-        deleteDoc(imageDoc).catch(console.error);
+        // Find and remove from Firebase by querying for the specific image
+        const q = query(
+          collection(db, "likedImages"),
+          where("userId", "==", user.user.id),
+          where("imageData", "==", generations[index].image.b64_json)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          deleteDoc(doc.ref).catch(console.error);
+        });
       } else {
         newSet.add(index);
-        // Add to Firebase
+        // Add to Firebase with auto-generated ID
         const imageDoc = {
-          userId: user.user.id, // Fixed: accessing ID through user.user.id
+          userId: user.user.id,
           prompt: generations[index].prompt,
           imageData: generations[index].image.b64_json,
           timestamp: new Date().toISOString(),
         };
-        addDoc(collection(db, "likedImages"), imageDoc).catch(console.error);
+        await addDoc(collection(db, "likedImages"), imageDoc);
       }
-      return newSet;
-    });
+      setLikedImages(newSet);
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      toast.error("Failed to update like status");
+    }
   };
 
   const { data: image, isFetching } = useQuery({

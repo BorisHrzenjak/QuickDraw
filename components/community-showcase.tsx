@@ -29,14 +29,24 @@ export default function CommunityShowcase() {
         );
         
         const querySnapshot = await getDocs(q);
-        const generations = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          prompt: doc.data().prompt,
-          imageData: doc.data().imageData,
-          likes: 1, 
-          timestamp: doc.data().timestamp,
-        }));
+        // Create a Map to store unique images by their content
+        const uniqueImages = new Map();
         
+        querySnapshot.docs.forEach((doc) => {
+          const imageData = doc.data().imageData;
+          // Only keep the most recent instance of each unique image
+          if (!uniqueImages.has(imageData) || doc.data().timestamp > uniqueImages.get(imageData).timestamp) {
+            uniqueImages.set(imageData, {
+              id: doc.id,
+              prompt: doc.data().prompt,
+              imageData: imageData,
+              likes: 1,
+              timestamp: doc.data().timestamp,
+            });
+          }
+        });
+        
+        const generations = Array.from(uniqueImages.values());
         setTopGenerations(generations);
       } catch (error) {
         console.error("Error fetching top generations:", error);
