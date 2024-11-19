@@ -1,0 +1,27 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "likedImages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "likedImages",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "likes", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "userLikes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "imageId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
