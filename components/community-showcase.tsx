@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { collection, query, orderBy, limit, getDocs, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, updateDoc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/utils";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { HeartIcon } from "./icons/heart-icon";
@@ -27,72 +27,65 @@ export default function CommunityShowcase() {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    const fetchGenerations = async () => {
-      try {
-        // Fetch latest generations
-        const latestQuery = query(
-          collection(db, "likedImages"),
-          orderBy("timestamp", "desc"),
-          limit(10)
-        );
-        
-        // Fetch top-rated generations
-        const topQuery = query(
-          collection(db, "likedImages"),
-          orderBy("likes", "desc"),
-          limit(10)
-        );
+    // Fetch latest generations with real-time updates
+    const latestQuery = query(
+      collection(db, "likedImages"),
+      orderBy("timestamp", "desc"),
+      limit(10)
+    );
+    
+    // Fetch top-rated generations with real-time updates
+    const topQuery = query(
+      collection(db, "likedImages"),
+      orderBy("likes", "desc"),
+      limit(10)
+    );
 
-        const [latestSnapshot, topSnapshot] = await Promise.all([
-          getDocs(latestQuery),
-          getDocs(topQuery)
-        ]);
+    // Set up real-time listeners
+    const unsubscribeLatest = onSnapshot(latestQuery, (snapshot) => {
+      const uniqueLatestImages = new Map();
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const imageData = data.imageData;
+        if (!uniqueLatestImages.has(imageData) || data.timestamp > uniqueLatestImages.get(imageData).timestamp) {
+          uniqueLatestImages.set(imageData, {
+            id: doc.id,
+            prompt: data.prompt,
+            imageData: imageData,
+            likes: data.likes || 0,
+            timestamp: data.timestamp,
+            likedBy: data.likedBy || [],
+          });
+        }
+      });
+      setLatestGenerations(Array.from(uniqueLatestImages.values()));
+      setLoading(false);
+    });
 
-        // Process latest generations
-        const uniqueLatestImages = new Map();
-        latestSnapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          const imageData = data.imageData;
-          if (!uniqueLatestImages.has(imageData) || data.timestamp > uniqueLatestImages.get(imageData).timestamp) {
-            uniqueLatestImages.set(imageData, {
-              id: doc.id,
-              prompt: data.prompt,
-              imageData: imageData,
-              likes: data.likes || 0,
-              timestamp: data.timestamp,
-              likedBy: data.likedBy || [],
-            });
-          }
-        });
+    const unsubscribeTop = onSnapshot(topQuery, (snapshot) => {
+      const uniqueTopImages = new Map();
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const imageData = data.imageData;
+        if (!uniqueTopImages.has(imageData) || data.likes > uniqueTopImages.get(imageData).likes) {
+          uniqueTopImages.set(imageData, {
+            id: doc.id,
+            prompt: data.prompt,
+            imageData: imageData,
+            likes: data.likes || 0,
+            timestamp: data.timestamp,
+            likedBy: data.likedBy || [],
+          });
+        }
+      });
+      setTopGenerations(Array.from(uniqueTopImages.values()));
+    });
 
-        // Process top-rated generations
-        const uniqueTopImages = new Map();
-        topSnapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          const imageData = data.imageData;
-          if (!uniqueTopImages.has(imageData) || data.likes > uniqueTopImages.get(imageData).likes) {
-            uniqueTopImages.set(imageData, {
-              id: doc.id,
-              prompt: data.prompt,
-              imageData: imageData,
-              likes: data.likes || 0,
-              timestamp: data.timestamp,
-              likedBy: data.likedBy || [],
-            });
-          }
-        });
-
-        setLatestGenerations(Array.from(uniqueLatestImages.values()));
-        setTopGenerations(Array.from(uniqueTopImages.values()));
-      } catch (error) {
-        console.error("Error fetching generations:", error);
-        toast.error("Failed to fetch images");
-      } finally {
-        setLoading(false);
-      }
+    // Cleanup listeners when component unmounts
+    return () => {
+      unsubscribeLatest();
+      unsubscribeTop();
     };
-
-    fetchGenerations();
   }, []);
 
   const handleLike = async (generation: Generation) => {

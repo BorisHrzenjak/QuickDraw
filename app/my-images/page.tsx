@@ -11,6 +11,7 @@ import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/fire
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShareButtons from "@/components/share-buttons";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 type SavedImage = {
   id: string; // Change from number to string
@@ -90,15 +91,46 @@ export default function MyImages() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
               {savedImages.map((image) => (
                 <div key={image.id} className="relative group">
-                  <Image
-                    src={`data:image/png;base64,${image.imageData}`}
-                    alt={image.prompt}
-                    width={400}
-                    height={400}
-                    placeholder="blur"
-                    blurDataURL={imagePlaceholder.blurDataURL}
-                    className="rounded-lg shadow-sm shadow-black"
-                  />
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <div className="cursor-pointer">
+                        <Image
+                          src={`data:image/png;base64,${image.imageData}`}
+                          alt={image.prompt}
+                          width={400}
+                          height={400}
+                          placeholder="blur"
+                          blurDataURL={imagePlaceholder.blurDataURL}
+                          className="rounded-lg shadow-sm shadow-black"
+                        />
+                      </div>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
+                      <div className="relative">
+                        <Image
+                          src={`data:image/png;base64,${image.imageData}`}
+                          alt={image.prompt}
+                          width={1024}
+                          height={1024}
+                          className="rounded-lg w-auto h-auto max-w-full max-h-[90vh] object-contain"
+                          placeholder="blur"
+                          blurDataURL={imagePlaceholder.blurDataURL}
+                        />
+                        <div className="absolute bottom-4 left-4 right-4 bg-black/50 p-4 rounded-md backdrop-blur-sm">
+                          <p className="text-sm text-gray-200">{image.prompt}</p>
+                          <div className="flex justify-between items-center mt-2">
+                            <ShareButtons imageData={image.imageData} prompt={image.prompt} />
+                            <button
+                              onClick={() => handleDeleteImage(image.id)}
+                              className="text-red-500 hover:text-red-400"
+                            >
+                              <HeartIcon className="w-5 h-5 fill-current" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex justify-between items-center">
                       <ShareButtons imageData={image.imageData} prompt={image.prompt} />
