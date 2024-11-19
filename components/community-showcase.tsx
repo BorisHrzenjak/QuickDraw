@@ -7,6 +7,7 @@ import { db } from "@/lib/utils";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { HeartIcon } from "./icons/heart-icon";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useUser } from "@clerk/nextjs";
 import toast from "@/lib/toast";
 
@@ -159,15 +160,55 @@ export default function CommunityShowcase() {
       ) : (
         generations.map((generation) => (
           <div key={generation.id} className="relative group">
-            <Image
-              src={`data:image/png;base64,${generation.imageData}`}
-              alt={generation.prompt}
-              width={300}
-              height={300}
-              className="rounded-lg w-full h-auto"
-              placeholder="blur"
-              blurDataURL={imagePlaceholder.blurDataURL}
-            />
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="cursor-pointer">
+                  <Image
+                    src={`data:image/png;base64,${generation.imageData}`}
+                    alt={generation.prompt}
+                    width={300}
+                    height={300}
+                    className="rounded-lg w-full h-auto"
+                    placeholder="blur"
+                    blurDataURL={imagePlaceholder.blurDataURL}
+                  />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
+                <div className="relative">
+                  <Image
+                    src={`data:image/png;base64,${generation.imageData}`}
+                    alt={generation.prompt}
+                    width={1024}
+                    height={1024}
+                    className="rounded-lg w-auto h-auto max-w-full max-h-[90vh] object-contain"
+                    placeholder="blur"
+                    blurDataURL={imagePlaceholder.blurDataURL}
+                  />
+                  <div className="absolute bottom-4 left-4 right-4 bg-black/50 p-4 rounded-md backdrop-blur-sm">
+                    <p className="text-sm text-gray-200">{generation.prompt}</p>
+                    <div className="flex items-center mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleLike(generation);
+                        }}
+                        className="flex items-center focus:outline-none"
+                      >
+                        <HeartIcon 
+                          className={`w-5 h-5 ${
+                            user && generation.likedBy?.includes(user.id)
+                              ? "text-pink-500 fill-current"
+                              : "text-gray-400 hover:text-pink-500"
+                          } transition-colors`}
+                        />
+                        <span className="text-sm text-gray-200 ml-1">{generation.likes}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
               <p className="text-xs text-gray-200 line-clamp-2">{generation.prompt}</p>
               <div className="flex items-center mt-1">
