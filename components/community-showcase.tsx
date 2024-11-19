@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/utils";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { HeartIcon } from "./icons/heart-icon";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
+import { useUser } from "@clerk/nextjs";
+import toast from "@/lib/toast";
 
 interface Generation {
   id: string;
@@ -14,12 +16,14 @@ interface Generation {
   imageData: string;
   likes: number;
   timestamp: string;
+  likedBy?: string[];
 }
 
 export default function CommunityShowcase() {
   const [latestGenerations, setLatestGenerations] = useState<Generation[]>([]);
   const [topGenerations, setTopGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     const fetchGenerations = async () => {
@@ -46,14 +50,16 @@ export default function CommunityShowcase() {
         // Process latest generations
         const uniqueLatestImages = new Map();
         latestSnapshot.docs.forEach((doc) => {
-          const imageData = doc.data().imageData;
-          if (!uniqueLatestImages.has(imageData) || doc.data().timestamp > uniqueLatestImages.get(imageData).timestamp) {
+          const data = doc.data();
+          const imageData = data.imageData;
+          if (!uniqueLatestImages.has(imageData) || data.timestamp > uniqueLatestImages.get(imageData).timestamp) {
             uniqueLatestImages.set(imageData, {
               id: doc.id,
-              prompt: doc.data().prompt,
+              prompt: data.prompt,
               imageData: imageData,
-              likes: doc.data().likes || 0,
-              timestamp: doc.data().timestamp,
+              likes: data.likes || 0,
+              timestamp: data.timestamp,
+              likedBy: data.likedBy || [],
             });
           }
         });
@@ -61,14 +67,16 @@ export default function CommunityShowcase() {
         // Process top-rated generations
         const uniqueTopImages = new Map();
         topSnapshot.docs.forEach((doc) => {
-          const imageData = doc.data().imageData;
-          if (!uniqueTopImages.has(imageData) || doc.data().likes > uniqueTopImages.get(imageData).likes) {
+          const data = doc.data();
+          const imageData = data.imageData;
+          if (!uniqueTopImages.has(imageData) || data.likes > uniqueTopImages.get(imageData).likes) {
             uniqueTopImages.set(imageData, {
               id: doc.id,
-              prompt: doc.data().prompt,
+              prompt: data.prompt,
               imageData: imageData,
-              likes: doc.data().likes || 0,
-              timestamp: doc.data().timestamp,
+              likes: data.likes || 0,
+              timestamp: data.timestamp,
+              likedBy: data.likedBy || [],
             });
           }
         });
@@ -77,6 +85,7 @@ export default function CommunityShowcase() {
         setTopGenerations(Array.from(uniqueTopImages.values()));
       } catch (error) {
         console.error("Error fetching generations:", error);
+        toast.error("Failed to fetch images");
       } finally {
         setLoading(false);
       }
@@ -84,6 +93,64 @@ export default function CommunityShowcase() {
 
     fetchGenerations();
   }, []);
+
+  const handleLike = async (generation: Generation) => {
+    if (!isLoaded || !user) {
+      toast.error("Please sign in to like images");
+      return;
+    }
+
+    try {
+      const docRef = doc(db, "likedImages", generation.id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        toast.error("Image not found");
+        return;
+      }
+
+      const data = docSnap.data();
+      const likedBy = data.likedBy || [];
+      const userId = user.id;
+      const isLiked = likedBy.includes(userId);
+
+      // Toggle like
+      if (isLiked) {
+        await updateDoc(docRef, {
+          likes: (data.likes || 0) - 1,
+          likedBy: likedBy.filter((id: string) => id !== userId),
+        });
+      } else {
+        await updateDoc(docRef, {
+          likes: (data.likes || 0) + 1,
+          likedBy: [...likedBy, userId],
+        });
+      }
+
+      // Update local state
+      const updateGenerations = (generations: Generation[]) =>
+        generations.map((g) => {
+          if (g.id === generation.id) {
+            return {
+              ...g,
+              likes: isLiked ? g.likes - 1 : g.likes + 1,
+              likedBy: isLiked
+                ? g.likedBy?.filter((id) => id !== userId)
+                : [...(g.likedBy || []), userId],
+            };
+          }
+          return g;
+        });
+
+      setLatestGenerations(updateGenerations(latestGenerations));
+      setTopGenerations(updateGenerations(topGenerations));
+
+      toast.success(isLiked ? "Like removed" : "Image liked!");
+    } catch (error) {
+      console.error("Error updating like:", error);
+      toast.error("Failed to update like");
+    }
+  };
 
   const GenerationGrid = ({ generations }: { generations: Generation[] }) => (
     <div className="space-y-4 h-[calc(100vh-12rem)] overflow-y-auto custom-scrollbar">
@@ -104,8 +171,22 @@ export default function CommunityShowcase() {
             <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
               <p className="text-xs text-gray-200 line-clamp-2">{generation.prompt}</p>
               <div className="flex items-center mt-1">
-                <HeartIcon className="w-4 h-4 text-pink-500 fill-current" />
-                <span className="text-xs text-gray-200 ml-1">{generation.likes}</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleLike(generation);
+                  }}
+                  className="flex items-center focus:outline-none"
+                >
+                  <HeartIcon 
+                    className={`w-4 h-4 ${
+                      user && generation.likedBy?.includes(user.id)
+                        ? "text-pink-500 fill-current"
+                        : "text-gray-400 hover:text-pink-500"
+                    } transition-colors`}
+                  />
+                  <span className="text-xs text-gray-200 ml-1">{generation.likes}</span>
+                </button>
               </div>
             </div>
           </div>
