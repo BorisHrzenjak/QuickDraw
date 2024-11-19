@@ -55,6 +55,15 @@ export default function MyImages() {
     }
   };
 
+  const handleDownloadImage = (imageData: string, prompt: string) => {
+    const link = document.createElement('a');
+    link.href = `data:image/png;base64,${imageData}`;
+    link.download = `${prompt.slice(0, 30)}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchLikedImages();
   }, [isLoaded, user]);
@@ -120,12 +129,28 @@ export default function MyImages() {
                           <p className="text-sm text-gray-200">{image.prompt}</p>
                           <div className="flex justify-between items-center mt-2">
                             <ShareButtons imageData={image.imageData} prompt={image.prompt} />
-                            <button
-                              onClick={() => handleDeleteImage(image.id)}
-                              className="text-red-500 hover:text-red-400"
-                            >
-                              <HeartIcon className="w-5 h-5 fill-current" />
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownloadImage(image.imageData, image.prompt);
+                                }}
+                                className="text-blue-500 hover:text-blue-400"
+                                title="Download image"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="7 10 12 15 17 10" />
+                                  <line x1="12" y1="15" x2="12" y2="3" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteImage(image.id)}
+                                className="text-red-500 hover:text-red-400"
+                              >
+                                <HeartIcon className="w-5 h-5 fill-current" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -134,12 +159,28 @@ export default function MyImages() {
                   <div className="absolute bottom-2 left-2 right-2 bg-black bg-opacity-50 p-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                     <div className="flex justify-between items-center">
                       <ShareButtons imageData={image.imageData} prompt={image.prompt} />
-                      <button
-                        onClick={() => handleDeleteImage(image.id)}
-                        className="text-red-500 hover:text-red-400"
-                      >
-                        <HeartIcon className="w-5 h-5 fill-current" />
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadImage(image.imageData, image.prompt);
+                          }}
+                          className="text-blue-500 hover:text-blue-400"
+                          title="Download image"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteImage(image.id)}
+                          className="text-red-500 hover:text-red-400"
+                        >
+                          <HeartIcon className="w-5 h-5 fill-current" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
