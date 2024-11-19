@@ -162,8 +162,8 @@ export default function CommunityShowcase() {
             <Image
               src={`data:image/png;base64,${generation.imageData}`}
               alt={generation.prompt}
-              width={200}
-              height={200}
+              width={300}
+              height={300}
               className="rounded-lg w-full h-auto"
               placeholder="blur"
               blurDataURL={imagePlaceholder.blurDataURL}
@@ -197,7 +197,7 @@ export default function CommunityShowcase() {
 
   if (loading) {
     return (
-      <div className="w-64 min-w-[250px] h-full bg-gray-900 bg-opacity-50 p-4 rounded-lg">
+      <div className="w-[364px] min-w-[350px] h-full bg-gray-900 bg-opacity-50 p-4 rounded-lg">
         <h2 className="text-lg font-semibold mb-4 text-gray-200">Community Showcase</h2>
         <div className="text-gray-400 text-sm">Loading...</div>
       </div>
@@ -205,7 +205,7 @@ export default function CommunityShowcase() {
   }
 
   return (
-    <div className="w-64 min-w-[250px] h-full bg-gray-900 bg-opacity-50 p-4 rounded-lg">
+    <div className="w-[364px] min-w-[350px] h-full bg-gray-900 bg-opacity-50 p-4 rounded-lg">
       <h2 className="text-lg font-semibold mb-4 text-gray-200">Community Showcase</h2>
       <Tabs defaultValue="latest" className="w-full">
         <TabsList className="w-full mb-4">
