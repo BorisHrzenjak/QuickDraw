@@ -405,40 +405,17 @@ export default function Home() {
           </a>
         </p>
 
-        <div className="mt-8 flex items-center justify-center md:mt-0 md:justify-between md:gap-6">
-          <p className="hidden whitespace-nowrap md:block">
-            100% free and{" "}
+        <div className="mt-8 flex items-center justify-center md:mt-0 md:justify-between">
+          <p className="whitespace-nowrap">
+            QuickDraw is a fork of{" "}
             <a
               href="https://github.com/Nutlope/blinkshot"
               target="_blank"
               className="underline underline-offset-4 transition hover:text-blue-500"
             >
-              open source
+              blinkshot
             </a>
           </p>
-
-          <div className="flex gap-6 md:gap-2">
-            <a href="https://github.com/Nutlope/blinkshot" target="_blank">
-              <Button
-                variant="outline"
-                size="sm"
-                className="inline-flex items-center gap-2"
-              >
-                <GithubIcon className="size-4" />
-                GitHub
-              </Button>
-            </a>
-            <a href="https://x.com/nutlope" target="_blank">
-              <Button
-                size="sm"
-                variant="outline"
-                className="inline-flex items-center gap-2"
-              >
-                <XIcon className="size-3" />
-                Twitter
-              </Button>
-            </a>
-          </div>
         </div>
       </footer>
     </div>
