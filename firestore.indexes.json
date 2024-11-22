@@ -4,6 +4,14 @@
       "collectionGroup": "likedImages",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "likedImages",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "timestamp", "order": "DESCENDING" }
       ]
     },

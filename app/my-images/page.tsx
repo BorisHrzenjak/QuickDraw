@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { SignedIn, useUser } from "@clerk/nextjs";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { db } from "@/lib/utils"; // Ensure db is imported
-import { collection, getDocs, query, where, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShareButtons from "@/components/share-buttons";
@@ -32,7 +32,8 @@ export default function MyImages() {
     
     const q = query(
       collection(db, "likedImages"), 
-      where("userId", "==", user.id)
+      where("userId", "==", user.id),
+      orderBy("timestamp", "desc")
     );
     
     const querySnapshot = await getDocs(q);
