@@ -1,11 +1,20 @@
-<a href="https://www.blinkshot.io">
-  <img alt="Blinkshot" src="./public/og-image.png">
-  <h1 align="center">BlinkShot</h1>
+<a href="https://www.quickdraw.io">
+  <img alt="QuickDraw" src="./public/og-image.png">
+  <h1 align="center">QuickDraw</h1>
 </a>
 
 <p align="center">
-  An open source real-time AI image generator. Powered by Flux through Together.ai.
+  An open source real-time AI image generator with voice commands. Powered by Flux through Together.ai.
 </p>
+
+## Features
+
+- 🎙️ Voice-to-Image: Generate images using voice commands
+- 🖼️ Multiple Aspect Ratios: Choose between square, portrait, and landscape formats
+- 🎨 Style Presets: Select from anime, photorealistic, or oil-painting styles
+- 💾 Image Storage: Save and manage your favorite generations
+- 🔄 Iterative Mode: Refine and improve your generations
+- 🌐 Social Sharing: Share your creations on Twitter, Facebook, Instagram, and via email
 
 ## Tech stack
 
@@ -14,10 +23,49 @@
 - Next.js app router with Tailwind
 - Helicone for observability
 - Plausible for website analytics
+- Firebase for image storage and management
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# AI API Keys
+TOGETHER_API_KEY=your_together_api_key_here
+HELICONE_API_KEY=your_helicone_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
+
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
+CLERK_SECRET_KEY=your_clerk_secret_key_here
+
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+```
+
+## Getting Started
+
+1. Clone the repo
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up your environment variables in `.env.local`
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Cloning & running
 
-1. Clone the repo: `git clone https://github.com/Nutlope/blinkshot`
+1. Clone the repo: `git clone https://github.com/BorisHernan/quickdraw`
 2. Create a `.env.local` file and add your [Together AI API key](https://www.dub.sh/together-ai): `TOGETHER_API_KEY=`
 3. Run `npm install` and `npm run dev` to install dependencies and run locally
 
