@@ -164,6 +164,7 @@ export default function CommunityShowcase() {
                     className="rounded-lg w-full h-auto"
                     placeholder="blur"
                     blurDataURL={imagePlaceholder.blurDataURL}
+                    priority={true}
                   />
                 </div>
               </DialogTrigger>
@@ -177,6 +178,7 @@ export default function CommunityShowcase() {
                     className="rounded-lg w-auto h-auto max-w-full max-h-[90vh] object-contain"
                     placeholder="blur"
                     blurDataURL={imagePlaceholder.blurDataURL}
+                    priority={true}
                   />
                   <div className="absolute bottom-4 left-4 right-4 bg-black/50 p-4 rounded-md backdrop-blur-sm">
                     <p className="text-sm text-gray-200">{generation.prompt}</p>

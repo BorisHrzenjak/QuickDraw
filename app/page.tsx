@@ -23,6 +23,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "@clerk/nextjs";
 import CommunityShowcase from "@/components/community-showcase";
+import { useImageCache } from "@/hooks/useImageCache";
 
 type ImageResponse = {
   b64_json: string;

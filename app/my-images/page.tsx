@@ -2,7 +2,7 @@
 
 import { HeartIcon } from "@/components/icons/heart-icon";
 import Logo from "@/components/logo";
-import Image from "next/image";
+import ImageWithCache from "@/components/image-with-cache";
 import { useEffect, useState } from "react";
 import { SignedIn, useUser } from "@clerk/nextjs";
 import imagePlaceholder from "@/public/image-placeholder.png";
@@ -12,6 +12,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShareButtons from "@/components/share-buttons";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useImageCache } from "@/hooks/useImageCache";
 
 type SavedImage = {
   id: string; // Change from number to string
@@ -24,6 +25,7 @@ export default function MyImages() {
   const { isLoaded, user } = useUser();
   const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<SavedImage | null>(null);
 
   const fetchLikedImages = async () => {
     if (!isLoaded || !user) return;
@@ -103,27 +105,25 @@ export default function MyImages() {
                   <Dialog>
                     <DialogTrigger asChild>
                       <div className="cursor-pointer">
-                        <Image
-                          src={`data:image/png;base64,${image.imageData}`}
+                        <ImageWithCache
+                          imageData={image.imageData}
                           alt={image.prompt}
                           width={400}
                           height={400}
-                          placeholder="blur"
-                          blurDataURL={imagePlaceholder.blurDataURL}
                           className="rounded-lg shadow-sm shadow-black"
+                          priority={true}
                         />
                       </div>
                     </DialogTrigger>
                     <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
                       <div className="relative">
-                        <Image
-                          src={`data:image/png;base64,${image.imageData}`}
+                        <ImageWithCache
+                          imageData={image.imageData}
                           alt={image.prompt}
                           width={1024}
                           height={1024}
                           className="rounded-lg w-auto h-auto max-w-full max-h-[90vh] object-contain"
-                          placeholder="blur"
-                          blurDataURL={imagePlaceholder.blurDataURL}
+                          priority={true}
                         />
                         <div className="absolute bottom-4 left-4 right-4 bg-black/50 p-4 rounded-md backdrop-blur-sm">
                           <p className="text-sm text-gray-200">{image.prompt}</p>
