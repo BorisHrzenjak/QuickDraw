@@ -13,15 +13,8 @@ export default function Logo(props: ComponentProps<"div">) {
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M21 7v10c0 3-1.5 5-5 5H8c-3.5 0-5-2-5-5V7c0-3 1.5-5 5-5h8c3.5 0 5 2 5 5Z"
+            d="M21.121 2.879a3 3 0 00-4.242 0l-1.172 1.172 4.242 4.242 1.172-1.172a3 3 0 000-4.242zM14.293 5.465L3 16.757V21h4.242l11.293-11.293-4.242-4.242z"
             stroke="url(#paint0_linear)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M11 5h6M7 9h10M7 13h10M7 17h6"
-            stroke="url(#paint1_linear)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -32,18 +25,7 @@ export default function Logo(props: ComponentProps<"div">) {
               x1="3"
               y1="2"
               x2="21"
-              y2="22"
-              gradientUnits="userSpaceOnUse"
-            >
-              <stop stopColor="#9333EA" />
-              <stop offset="1" stopColor="#DB2777" />
-            </linearGradient>
-            <linearGradient
-              id="paint1_linear"
-              x1="7"
-              y1="5"
-              x2="17"
-              y2="17"
+              y2="21"
               gradientUnits="userSpaceOnUse"
             >
               <stop stopColor="#9333EA" />
