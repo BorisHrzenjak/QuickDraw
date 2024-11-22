@@ -13,6 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ShareButtons from "@/components/share-buttons";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { useImageCache } from "@/hooks/useImageCache";
+import { ArrowLeft } from "lucide-react";
 
 type SavedImage = {
   id: string; // Change from number to string
@@ -74,7 +75,14 @@ export default function MyImages() {
   return (
     <SignedIn>
       <div className="flex h-full flex-col px-5">
-        <header className="flex justify-center pt-20 md:justify-end md:pt-3">
+        <header className="flex justify-between items-center pt-20 md:pt-3">
+          <a 
+            href="/" 
+            className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back</span>
+          </a>
           <div className="absolute left-1/2 top-6 -translate-x-1/2">
             <a href="/" className="hover:opacity-80 transition-opacity">
               <Logo />
