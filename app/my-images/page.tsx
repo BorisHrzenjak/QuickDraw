@@ -5,18 +5,16 @@ import Logo from "@/components/logo";
 import ImageWithCache from "@/components/image-with-cache";
 import { useEffect, useState } from "react";
 import { SignedIn, useUser } from "@clerk/nextjs";
-import imagePlaceholder from "@/public/image-placeholder.png";
-import { db } from "@/lib/utils"; // Ensure db is imported
+import { db } from "@/lib/utils";
 import { collection, getDocs, query, where, orderBy, deleteDoc, doc } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ShareButtons from "@/components/share-buttons";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useImageCache } from "@/hooks/useImageCache";
 import { ArrowLeft } from "lucide-react";
 
 type SavedImage = {
-  id: string; // Change from number to string
+  id: string;
   prompt: string;
   imageData: string;
   timestamp: string;
@@ -26,7 +24,6 @@ export default function MyImages() {
   const { isLoaded, user } = useUser();
   const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<SavedImage | null>(null);
 
   const fetchLikedImages = async () => {
     if (!isLoaded || !user) return;
@@ -70,7 +67,7 @@ export default function MyImages() {
 
   useEffect(() => {
     fetchLikedImages();
-  }, [isLoaded, user]);
+  }, [isLoaded, user, fetchLikedImages]);
 
   return (
     <SignedIn>

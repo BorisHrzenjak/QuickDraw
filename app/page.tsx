@@ -1,13 +1,10 @@
 "use client";
 
-import GithubIcon from "@/components/icons/github-icon";
-import XIcon from "@/components/icons/x-icon";
 import { MicrophoneIcon } from "@/components/icons/microphone-icon";
 import { HeartIcon } from "@/components/icons/heart-icon";
 import Logo from "@/components/logo";
 import Spinner from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,9 +13,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { SignInButton } from "@clerk/nextjs";
 import { db } from "@/lib/utils";
-import { collection, addDoc, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, getDocs, query, where } from "firebase/firestore";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUser } from "@clerk/nextjs";
@@ -64,7 +60,7 @@ export default function Home() {
         );
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
-          deleteDoc(doc.ref).catch(console.error);
+          deleteDoc(doc.ref).catch((err: Error) => console.error(err));
         });
       } else {
         newSet.add(index);
@@ -85,7 +81,7 @@ export default function Home() {
   };
 
   const { data: image, isFetching } = useQuery({
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: ImageResponse | undefined) => previousData,
     queryKey: [debouncedPrompt, refinePrompt],
     queryFn: async () => {
       let finalPrompt = prompt;

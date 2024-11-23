@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { collection, query, orderBy, limit, getDocs, doc, updateDoc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDoc, updateDoc, onSnapshot, doc } from "firebase/firestore";
 import { db } from "@/lib/utils";
 import imagePlaceholder from "@/public/image-placeholder.png";
 import { HeartIcon } from "./icons/heart-icon";
